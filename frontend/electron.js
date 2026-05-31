@@ -23,9 +23,9 @@ function createWindow() {
   // Suppress default top menu bars for professional software visual aesthetics
   mainWindow.setMenuBarVisibility(false);
 
-  // Load the compiled Vite index.html file
-  mainWindow.loadFile(path.join(__dirname, 'dist/index.html')).catch((err) => {
-    console.error('Failed to load compiled Vite application:', err);
+  // Wrap and load the live deployed cloud client for instant OTA updates
+  mainWindow.loadURL('https://hotel-management-system-one.vercel.app').catch((err) => {
+    console.error('Failed to load live Vercel application:', err);
   });
 }
 
