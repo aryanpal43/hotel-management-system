@@ -10,9 +10,20 @@ const { errorHandler } = require('./middlewares/errorHandler');
 const app = express();
 
 // Config CORS - support cross-origin requests from React dashboard
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://hotel-management-system-one.vercel.app'
+];
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin) || origin === process.env.FRONTEND_URL) {
+        return callback(null, true);
+      }
+      return callback(null, new Error('CORS Not Allowed'));
+    },
     credentials: true,
   })
 );

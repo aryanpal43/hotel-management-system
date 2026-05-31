@@ -25,9 +25,17 @@ connectDB();
 const server = http.createServer(app);
 
 // Setup Socket.IO Server
+const allowedSocketOrigins = [
+  'http://localhost:5173',
+  'https://hotel-management-system-one.vercel.app'
+];
+if (process.env.FRONTEND_URL) {
+  allowedSocketOrigins.push(process.env.FRONTEND_URL);
+}
+
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    origin: allowedSocketOrigins,
     methods: ['GET', 'POST'],
     credentials: true,
   },
