@@ -185,7 +185,7 @@ export const Login = () => {
               >
                 <Sparkles size={12} color="#fcd34d" />
                 <Typography variant="caption" sx={{ fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-                  SaaS Hotel Management Console
+                  HotelCloud Live OTA Operations Desk
                 </Typography>
               </Box>
 
