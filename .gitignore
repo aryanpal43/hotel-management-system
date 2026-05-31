@@ -1,0 +1,25 @@
+# Dependency directories
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# Build and package outputs
+dist/
+backend/dist/
+frontend/dist/
+frontend/dist_electron/
+frontend/dist_desktop/
+
+# Local environment secret variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs and system files
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
