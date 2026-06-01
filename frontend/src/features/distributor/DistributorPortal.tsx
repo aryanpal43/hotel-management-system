@@ -48,6 +48,13 @@ export const DistributorPortal = () => {
   const [zip, setZip] = useState('');
   const [showConfig, setShowConfig] = useState(false);
 
+  // Custom Plan Form State
+  const [newPlanName, setNewPlanName] = useState('');
+  const [newPlanPrice, setNewPlanPrice] = useState('');
+  const [newPlanRooms, setNewPlanRooms] = useState('20');
+  const [newPlanUsers, setNewPlanUsers] = useState('5');
+  const [newPlanFeatures, setNewPlanFeatures] = useState<string[]>([]);
+
   // License Override Dialog State
   const [openOverride, setOpenOverride] = useState(false);
   const [selectedHotel, setSelectedHotel] = useState<HotelLicense | null>(null);
@@ -102,6 +109,43 @@ export const DistributorPortal = () => {
   useEffect(() => {
     if (accessToken) fetchDistributorData();
   }, [accessToken]);
+
+  useEffect(() => {
+    if (user && user.allowedModules) {
+      setNewPlanFeatures(user.allowedModules);
+    }
+  }, [user]);
+
+  const handleCreatePlan = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setMsg('');
+    try {
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+      await axios.post(`${backendUrl}/api/subscription-plans`, {
+        name: newPlanName,
+        price: parseFloat(newPlanPrice),
+        limits: {
+          rooms: parseInt(newPlanRooms),
+          users: parseInt(newPlanUsers),
+        },
+        features: newPlanFeatures
+      }, {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
+
+      setMsg('Custom Subscription Plan created successfully!');
+      setNewPlanName('');
+      setNewPlanPrice('');
+      setNewPlanRooms('20');
+      setNewPlanUsers('5');
+      if (user.allowedModules) {
+        setNewPlanFeatures(user.allowedModules);
+      }
+      fetchDistributorData();
+    } catch (err: any) {
+      setMsg(err.response?.data?.error || 'Failed to create subscription plan.');
+    }
+  };
 
   const handleOnboardHotel = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -223,8 +267,8 @@ export const DistributorPortal = () => {
       )}
 
       <Grid container spacing={2}>
-        {/* Onboarding Form */}
-        <Grid item xs={12} lg={4}>
+        {/* Onboarding & Custom Plan Forms */}
+        <Grid item xs={12} lg={4} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <Card sx={{ p: 1.5 }}>
             <CardContent sx={{ p: 1 }}>
               <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -329,6 +373,68 @@ export const DistributorPortal = () => {
                   <Grid item xs={12} sx={{ mt: 1 }}>
                     <Button type="submit" variant="contained" fullWidth size="small" sx={{ py: 1, fontWeight: 'bold' }}>
                       Register Hotel Admin
+                    </Button>
+                  </Grid>
+                </Grid>
+              </form>
+            </CardContent>
+          </Card>
+
+          <Card sx={{ p: 1.5 }}>
+            <CardContent sx={{ p: 1 }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                <PlusCircle size={16} color="#ec4899" /> Create Custom Subscription Plan
+              </Typography>
+              <form onSubmit={handleCreatePlan}>
+                <Grid container spacing={1.5}>
+                  <Grid item xs={12}>
+                    <TextField fullWidth size="small" label="Plan Name (e.g. Bronze, Gold)" value={newPlanName} onChange={(e) => setNewPlanName(e.target.value)} required />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField fullWidth size="small" type="number" label="Monthly Price (INR)" value={newPlanPrice} onChange={(e) => setNewPlanPrice(e.target.value)} required />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField fullWidth size="small" type="number" label="Rooms Limit" value={newPlanRooms} onChange={(e) => setNewPlanRooms(e.target.value)} required />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField fullWidth size="small" type="number" label="Users Limit" value={newPlanUsers} onChange={(e) => setNewPlanUsers(e.target.value)} required />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography variant="caption" sx={{ fontWeight: 'bold', color: 'text.secondary', display: 'block', mb: 1 }}>
+                      PLAN INCLUDED MODULES:
+                    </Typography>
+                    <FormGroup sx={{ display: 'flex', flexDirection: 'column' }}>
+                      {['RESERVATIONS', 'HOUSEKEEPING', 'ACCOUNTING', 'MAINTENANCE', 'INVENTORY', 'POS'].map((mod) => {
+                        const isResellable = user.allowedModules?.includes(mod);
+                        if (!isResellable) return null;
+                        const isChecked = newPlanFeatures.includes(mod);
+                        return (
+                          <FormControlLabel
+                            key={mod}
+                            control={
+                              <Checkbox
+                                checked={isChecked}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setNewPlanFeatures([...newPlanFeatures, mod]);
+                                  } else {
+                                    setNewPlanFeatures(newPlanFeatures.filter(m => m !== mod));
+                                  }
+                                }}
+                                color="secondary"
+                                size="small"
+                              />
+                            }
+                            label={<Typography variant="body2" sx={{ fontSize: '0.8rem' }}>{mod}</Typography>}
+                            sx={{ my: -0.2 }}
+                          />
+                        );
+                      })}
+                    </FormGroup>
+                  </Grid>
+                  <Grid item xs={12} sx={{ mt: 1 }}>
+                    <Button type="submit" color="secondary" variant="contained" fullWidth size="small" sx={{ py: 1, fontWeight: 'bold' }}>
+                      Create Subscription Plan
                     </Button>
                   </Grid>
                 </Grid>

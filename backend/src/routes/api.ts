@@ -320,7 +320,23 @@ router.get(
 router.get('/subscription-plans', protect, async (req, res) => {
   try {
     const SubscriptionPlan = require('../models/SubscriptionPlan');
-    const plans = await SubscriptionPlan.find({ isActive: true });
+    let query: any = { isActive: true };
+    
+    if (req.user.roles.includes('DISTRIBUTOR')) {
+      query.$or = [{ distributorId: null }, { distributorId: req.user._id }];
+    } else if (req.user.hotelId) {
+      const Hotel = require('../models/Hotel');
+      const hotel = await Hotel.findById(req.user.hotelId);
+      const distId = hotel ? hotel.distributorId : null;
+      query.$or = [{ distributorId: null }];
+      if (distId) {
+        query.$or.push({ distributorId: distId });
+      }
+    } else if (!req.user.roles.includes('SUPER_ADMIN')) {
+      query.distributorId = null;
+    }
+    
+    const plans = await SubscriptionPlan.find(query);
     res.status(200).json(plans);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -328,10 +344,20 @@ router.get('/subscription-plans', protect, async (req, res) => {
 });
 
 // Create software plans
-router.post('/subscription-plans', protect, requireRole(['SUPER_ADMIN']), async (req, res) => {
+router.post('/subscription-plans', protect, requireRole(['SUPER_ADMIN', 'DISTRIBUTOR']), async (req, res) => {
   try {
     const SubscriptionPlan = require('../models/SubscriptionPlan');
     const { name, price, limits, features } = req.body;
+    
+    const isDistributor = req.user.roles.includes('DISTRIBUTOR');
+    const distId = isDistributor ? req.user._id : null;
+    
+    // Check if plan name already exists under the same distributor scope
+    const existing = await SubscriptionPlan.findOne({ name, distributorId: distId });
+    if (existing) {
+      return res.status(400).json({ error: 'A subscription plan with this name already exists.' });
+    }
+    
     const plan = new SubscriptionPlan({
       name,
       price: parseFloat(price),
@@ -339,9 +365,10 @@ router.post('/subscription-plans', protect, requireRole(['SUPER_ADMIN']), async 
         rooms: parseInt(limits.rooms) || 20,
         users: parseInt(limits.users) || 5,
         storageGb: 5,
-        whatsappAlerts: 1000
+        whatsappAlerts: limits.whatsappAlerts ? parseInt(limits.whatsappAlerts) : 1000
       },
-      features: features || ['RESERVATIONS', 'HOUSEKEEPING', 'ACCOUNTING']
+      features: features || ['RESERVATIONS', 'HOUSEKEEPING', 'ACCOUNTING'],
+      distributorId: distId
     });
     const saved = await plan.save();
     res.status(201).json(saved);

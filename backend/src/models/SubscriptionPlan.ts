@@ -5,7 +5,6 @@ const subscriptionPlanSchema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
-      unique: true,
     },
     price: {
       type: Number,
@@ -45,10 +44,17 @@ const subscriptionPlanSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    distributorId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+    },
   },
   {
     timestamps: true,
   }
 );
+
+subscriptionPlanSchema.index({ name: 1, distributorId: 1 }, { unique: true });
 
 module.exports = mongoose.model('SubscriptionPlan', subscriptionPlanSchema);

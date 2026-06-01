@@ -22,8 +22,8 @@ const requirePermission = (page, action) => {
       return res.status(401).json({ error: 'User session is not authenticated.' });
     }
 
-    // Super Admin and Hotel Admin have full access bypass
-    if (req.user.roles.includes('SUPER_ADMIN') || req.user.roles.includes('HOTEL_ADMIN')) {
+    // Super Admin, Distributor, and Hotel Admin have full access bypass
+    if (req.user.roles.includes('SUPER_ADMIN') || req.user.roles.includes('DISTRIBUTOR') || req.user.roles.includes('HOTEL_ADMIN')) {
       return next();
     }
 
