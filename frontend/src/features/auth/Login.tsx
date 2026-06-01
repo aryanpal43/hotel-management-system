@@ -384,38 +384,6 @@ export const Login = () => {
               </Button>
             </form>
 
-            {/* Quick Seeder Login Assist */}
-            <Box sx={{ mt: 4, pt: 3, borderTop: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(15, 23, 42, 0.08)', textAlign: 'center' }}>
-              <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 2, fontWeight: 700, letterSpacing: '0.02em' }}>
-                TEST ACCOUNT QUICK PRESETS
-              </Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, justifyContent: 'center' }}>
-                <Chip
-                  label="Super Admin"
-                  onClick={() => fillCredentials('admin', 'admin@123')}
-                  clickable
-                  variant="outlined"
-                  size="small"
-                  sx={{ fontSize: '0.7rem', fontWeight: 700, borderColor: 'primary.main', color: 'primary.main' }}
-                />
-                <Chip
-                  label="Distributor"
-                  onClick={() => fillCredentials('distributor@saas.com', 'distributor@123')}
-                  clickable
-                  variant="outlined"
-                  size="small"
-                  sx={{ fontSize: '0.7rem', fontWeight: 700, borderColor: 'secondary.main', color: 'secondary.main' }}
-                />
-                <Chip
-                  label="Hotel Admin"
-                  onClick={() => fillCredentials('hoteladmin@saas.com', 'hoteladmin@123')}
-                  clickable
-                  variant="outlined"
-                  size="small"
-                  sx={{ fontSize: '0.7rem', fontWeight: 700, borderColor: 'success.main', color: 'success.main' }}
-                />
-              </Box>
-            </Box>
           </Grid>
         </Grid>
       </Card>
